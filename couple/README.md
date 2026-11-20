@@ -47,6 +47,18 @@ with sample content. Hosting `index.html` on GitHub Pages shows that preview onl
 as a standalone site you would replace the data layer in `src/lib.jsx` (`Provider`, `Data`, `api`)
 with your own backend, for example Supabase or Firebase. The views only use `useApp()`.
 
+## Supabase sign-in
+
+The site uses Supabase Auth for email/password sign-in. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+as Vercel environment variables for each deployment environment, then redeploy. The anon key is
+intended for browser use; never use a Supabase service-role key in the client. Disable public
+sign-ups in Supabase Auth and create or invite only the two accounts you need. Add the deployed
+site URL to Supabase Auth's allowed redirect URLs for password resets.
+
+Authentication gates the app interface but does not move its data into Supabase. Outside the
+Claude artifact runtime, the app still uses demo data held only in memory. Do not store private
+shared content there until a persistent backend with row-level security policies is implemented.
+
 ## Publishing changes
 
 After `npm run build`, publish `index.html` again from Claude with the same artifact URL, with the

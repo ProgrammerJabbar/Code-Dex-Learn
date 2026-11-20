@@ -11,6 +11,10 @@ const out = await build({
   jsx: 'transform', jsxFactory: 'React.createElement', jsxFragment: 'React.Fragment',
   loader: { '.js': 'jsx' },
   alias: { react: path.join(root, 'src/shims/react.js'), 'react-dom/client': path.join(root, 'src/shims/rdc.js') },
+  define: {
+    'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL || ''),
+    'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY || ''),
+  },
   banner: { js: 'var React=window.React;' },
 });
 const js = out.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');

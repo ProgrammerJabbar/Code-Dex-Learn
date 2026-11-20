@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider, useApp, SWATCH } from './lib.jsx';
+import { Provider, useApp, SWATCH, Splash } from './lib.jsx';
+import { AuthProvider, useAuth } from './auth.jsx';
 import { Icon, Animal, Flower, GiftBox, ANIMALS, variantsOf } from './art.jsx';
 import Days from './views/Days.jsx';
 import PinIt from './views/PinIt.jsx';
@@ -11,6 +12,7 @@ import Garden from './views/Garden.jsx';
 import Critters from './views/Critters.jsx';
 import Gifts from './views/Gifts.jsx';
 import Us from './views/Us.jsx';
+import Login from './views/Login.jsx';
 
 const TABS = [['days', 'planet', 'Days'], ['gallery', 'frame', 'Gallery'], ['chat', 'chat', 'Chat'], ['letters', 'mail', 'Letters'], ['more', 'more', 'More']];
 const SUB = ['garden', 'critters', 'gifts', 'us'];
@@ -42,7 +44,7 @@ function Welcome() {
   );
 }
 
-function MoreHub({ go }) {
+function MoreHub({ go, onSignOut }) {
   const { counts, data } = useApp();
   const tiles = [
     ['garden', 'Garden', `${data.garden.length} flower${data.garden.length === 1 ? '' : 's'} growing`, <div className="art-row"><Flower kind="lavender" stage={3} size={64} /><Flower kind="lily" stage={3} size={64} /><Flower kind="rose" stage={3} size={64} /></div>, 0],
@@ -52,7 +54,7 @@ function MoreHub({ go }) {
   ];
   return (
     <div className="more">
-      <header className="head pad"><div className="head-t"><h1>More</h1><p>Everything else in your world</p></div></header>
+      <header className="head pad"><div className="head-t"><h1>More</h1><p>Everything else in your world</p></div><button className="btn ghost auth-signout" onClick={onSignOut}>Sign out</button></header>
       <div className="tiles pad">
         {tiles.map(([k, t, s, art, n]) => (
           <button key={k} className={'tile tile-' + k} onClick={() => go(k)}>
@@ -68,13 +70,19 @@ function MoreHub({ go }) {
 
 function Shell() {
   const { me, demo, counts } = useApp();
+  const { signOut } = useAuth();
   const [route, setRoute] = useState(() => { const h = (location.hash || '').slice(1); return ROUTES.includes(h) ? h : 'days'; });
   const [pin, setPin] = useState(false);
+  const [signOutError, setSignOutError] = useState('');
   useEffect(() => {
     const f = () => { const h = (location.hash || '').slice(1); if (ROUTES.includes(h)) setRoute(h); };
     window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f);
   }, []);
   const go = (r) => { setRoute(r); try { location.hash = r; } catch (e) { /* hash may be unavailable */ } };
+  const onSignOut = async () => {
+    setSignOutError('');
+    try { await signOut(); } catch (e) { setSignOutError(e.message || 'Could not sign out. Please try again.'); }
+  };
   if (!me) return <Welcome />;
   const tab = SUB.includes(route) ? 'more' : route;
   const back = () => go('more');
@@ -87,7 +95,7 @@ function Shell() {
         {route === 'gallery' && <Gallery />}
         {route === 'chat' && <Chat />}
         {route === 'letters' && <Letters />}
-        {route === 'more' && <MoreHub go={go} />}
+        {route === 'more' && <><MoreHub go={go} onSignOut={onSignOut} />{signOutError && <p className="auth-alert auth-signout-error" role="alert">{signOutError}</p>}</>}
         {route === 'garden' && <Garden back={back} />}
         {route === 'critters' && <Critters back={back} />}
         {route === 'gifts' && <Gifts back={back} />}
@@ -106,4 +114,13 @@ function Shell() {
   );
 }
 
-createRoot(document.getElementById('root')).render(<Provider><Shell /></Provider>);
+function AppGate() {
+  const { configured, loading, user, recovering } = useAuth();
+  if (window.claude && typeof window.claude.use === 'function') return <Provider><Shell /></Provider>;
+  if (!configured) return <Login />;
+  if (loading) return <Splash />;
+  if (recovering || !user) return <Login />;
+  return <Provider><Shell /></Provider>;
+}
+
+createRoot(document.getElementById('root')).render(<AuthProvider><AppGate /></AuthProvider>);

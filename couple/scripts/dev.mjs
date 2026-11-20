@@ -20,7 +20,11 @@ const ctx = await context({
   entryPoints: [path.join(root, 'src/main.jsx')], outfile: path.join(out, 'main.js'),
   bundle: true, format: 'iife', target: ['es2019'], sourcemap: true,
   jsx: 'transform', jsxFactory: 'React.createElement', jsxFragment: 'React.Fragment',
-  define: { 'process.env.NODE_ENV': '"development"' },
+  define: {
+    'process.env.NODE_ENV': '"development"',
+    'process.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL || ''),
+    'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY || ''),
+  },
   plugins: [{ name: 'css-copy', setup(b) { b.onEnd(copy); } }],
 });
 await ctx.watch();
