@@ -1,0 +1,11 @@
+{
+  "name": "zhu-box",
+  "private": true,
+  "workspaces": [
+    "couple"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=our-days",
+    "build": "npm run build --workspace=our-days"
+  }
+}

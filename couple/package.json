@@ -1,0 +1,16 @@
+{
+  "name": "our-days",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A private shared space for two: polaroid wall, museum gallery, letters, chat, garden, critters and surprise gifts.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
