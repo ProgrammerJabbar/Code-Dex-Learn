@@ -55,7 +55,7 @@ function Question() {
 }
 
 export default function Us({ back }) {
-  const { me, partner, uid, put, data, demo, hasAssets } = useApp();
+  const { me, partner, uid, put, data, hasAssets } = useApp();
   const [name, setName] = useState(me ? me.name : '');
   const anniv = data.settings.anniversary || '';
   const n = dayNumber(anniv);
@@ -91,8 +91,7 @@ export default function Us({ back }) {
           {partner ? <div className="me-row"><Avatar p={partner} size={56} /><div><strong>{partner.name}</strong><p className="soft">Joined {dateStr(partner.ts || Date.now())}</p></div></div>
             : <p>Nobody else has joined yet. Open this page's Share menu on claude.ai and invite your partner as an Editor so they can post, upload photos and write back.</p>}
         </section>
-        {demo && <section className="card warn"><p><strong>Preview mode.</strong> You are not signed in to a shared space, so nothing here is saved. Open the published page while signed in to keep your memories.</p></section>}
-        {!demo && !hasAssets && <section className="card"><p className="soft small">Photos are stored in compact form because this view cannot upload full-size files. Editors get full-quality photos.</p></section>}
+        {!hasAssets && <section className="card"><p className="soft small">Photos are compressed in your browser and saved with the shared data.</p></section>}
       </div>
     </div>
   );

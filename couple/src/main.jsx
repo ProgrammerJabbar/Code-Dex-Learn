@@ -69,7 +69,7 @@ function MoreHub({ go, onSignOut }) {
 }
 
 function Shell() {
-  const { me, demo, counts } = useApp();
+  const { me, counts } = useApp();
   const { signOut } = useAuth();
   const [route, setRoute] = useState(() => { const h = (location.hash || '').slice(1); return ROUTES.includes(h) ? h : 'days'; });
   const [pin, setPin] = useState(false);
@@ -89,7 +89,6 @@ function Shell() {
   const badge = { days: counts.days, gallery: counts.gallery, chat: counts.chat, letters: counts.letters, more: counts.gifts };
   return (
     <div className="app">
-      {demo && <div className="demo-bar" role="note">Preview mode: nothing here is saved</div>}
       <main className="view" key={route}>
         {route === 'days' && <Days openPin={() => setPin(true)} />}
         {route === 'gallery' && <Gallery />}

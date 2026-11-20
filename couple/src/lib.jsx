@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Animal, Icon } from './art.jsx';
+import { supabase, useAuth } from './auth.jsx';
+import { createSupabaseDb } from './supabaseDb.js';
 
 export const DAY = 864e5;
 export const rid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-3);
@@ -167,39 +169,50 @@ export function Splash({ slow }) {
 }
 
 export function Provider({ children }) {
+  const { user } = useAuth();
   const [boot, setBoot] = useState(null);
+  const [bootError, setBootError] = useState(null);
   useEffect(() => {
     let dead = false;
     (async () => {
-      let r = null;
       try {
         const c = window.claude;
         if (c && c.use) {
           const [db, user, assets] = await Promise.all([c.use('db'), c.use('user'), c.use('assets')]);
           const uid = user ? await user.id() : null;
-          if (db && uid) r = { db, assets, uid, demo: false };
+          if (!db || !uid) throw new Error('The Claude runtime did not provide a database and user.');
+          if (!dead) setBoot({ db, assets, uid });
+          return;
         }
-      } catch (e) { console.warn(e); }
-      if (!r) { const m = makeDemo(); r = { db: m.db, assets: null, uid: m.uid, demo: true }; }
-      if (!dead) setBoot(r);
+        if (!supabase || !user) throw new Error('Supabase authentication is required to open shared data.');
+        const { data: isMember, error } = await supabase.rpc('is_couple_member');
+        if (error) throw error;
+        if (!isMember) throw new Error('This account is not authorized for this shared space. Ask the owner to add it to couple_members.');
+        if (!dead) setBoot({ db: createSupabaseDb(supabase), assets: null, uid: user.id });
+      } catch (error) {
+        console.error('App initialization failed:', error);
+        if (!dead) setBootError(error.message || 'Could not initialize the app.');
+      }
     })();
     return () => { dead = true; };
-  }, []);
+  }, [user]);
+  if (bootError) return <div className="storage-error" role="alert"><h1>Could not open Our Days</h1><p>{bootError}</p><p>Check your Supabase setup and try again.</p></div>;
   if (!boot) return <Splash />;
   return <Data boot={boot}>{children}</Data>;
 }
 
 function Data({ boot, children }) {
-  const { db, assets, uid, demo } = boot;
+  const { db, assets, uid } = boot;
   const [data, setData] = useState({});
   const [seen, setSeen] = useState(null);
   const [slow, setSlow] = useState(false);
   const [toastMsg, setToast] = useState(null);
+  const [dataError, setDataError] = useState(null);
   const baseline = useRef(null);
   const seenRef = useRef({});
 
   useEffect(() => {
-    const un = []; const bad = (e) => console.warn('db', e);
+    const un = []; const bad = (e) => { console.error('Data sync failed:', e); setDataError(e.message || 'Could not load shared data.'); };
     const col = (key, q) => un.push(q.onSnapshot((s) => setData((d) => ({ ...d, [key]: s.docs.map((x) => ({ id: x.id, ...x.data() })) })), bad));
     col('pins', db.collection('pins').orderBy('ts', 'desc').limit(200));
     col('gallery', db.collection('gallery'));
@@ -270,8 +283,11 @@ function Data({ boot, children }) {
     if (!latest || latest <= (seenRef.current[sec] || 0)) return;
     const next = { ...seenRef.current, [sec]: Math.max(Date.now(), latest) };
     seenRef.current = next; setSeen(next);
-    db.doc(`data/users/${uid}/seen`).set(next).catch(() => {});
-  }, [data.pins, data.messages, data.gallery, db, uid]);
+    db.doc(`data/users/${uid}/seen`).set(next).catch((error) => {
+      console.error('Could not update read status:', error);
+      toast('Could not sync read status. Check your connection and try again.');
+    });
+  }, [data.pins, data.messages, data.gallery, db, uid, toast]);
 
   const isNew = (sec, item) => !!baseline.current && item.by !== uid && item.ts > (baseline.current[sec] || 0);
 
@@ -283,10 +299,10 @@ function Data({ boot, children }) {
   }, [data.pins, data.messages, data.gallery, data.letters, data.gifts, seen, uid]);
 
   const ready = data.profiles && data.settings && seen && data.pins && data.messages;
-  const value = { uid, demo, hasAssets: !!assets, data, me, partner, byId, nameOf, ...api, toast, markSeen, isNew, counts };
+  const value = { uid, hasAssets: !!assets, data, me, partner, byId, nameOf, ...api, toast, markSeen, isNew, counts };
   return (
     <Ctx.Provider value={value}>
-      {ready ? children : <Splash slow={slow} />}
+      {dataError ? <div className="storage-error" role="alert"><h1>Could not sync Our Days</h1><p>{dataError}</p><p>Check the database schema and row-level security settings.</p></div> : ready ? children : <Splash slow={slow} />}
       {toastMsg && <div className="toast" role="status" key={toastMsg.k}>{toastMsg.msg}</div>}
     </Ctx.Provider>
   );

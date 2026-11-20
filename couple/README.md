@@ -31,33 +31,31 @@ npm run dev      # http://localhost:5173, preview mode with sample content
 npm run build    # writes index.html
 ```
 
-## How it stores data
+## Data and access
 
-The published page runs as a private Claude artifact and uses its runtime capabilities:
+The app uses Claude's `db`, `user`, and `assets` runtime when opened as a Claude artifact. On Vercel,
+it uses Supabase Auth and the `app_data` table for persistent shared data.
 
-- `db` keeps shared data (pins, gallery, letters, messages, gifts, garden, critters, profiles).
-- `user` gives each person a stable id.
-- `assets` stores full-size photos. Viewers who cannot upload get compressed inline photos instead.
+1. Run [`supabase/schema.sql`](./supabase/schema.sql) in the Supabase SQL Editor.
+2. Create the two users in Supabase Auth. In the SQL Editor, add their account emails to
+   `public.couple_members` (replace the example addresses):
 
-Collections written by the page: `pins`, `gallery`, `letters`, `messages`, `gifts`, `garden`, `critters`,
-`profiles`, `questions`, `couple/settings`, and `data/users/<id>/seen` (private per person).
+   ```sql
+   insert into public.couple_members (user_id)
+   select id from auth.users
+   where lower(email) in ('you@example.com', 'partner@example.com')
+   on conflict (user_id) do nothing;
+   ```
 
-Outside that environment there is no shared database, so the app falls back to an in-memory preview
-with sample content. Hosting `index.html` on GitHub Pages shows that preview only. To run it
-as a standalone site you would replace the data layer in `src/lib.jsx` (`Provider`, `Data`, `api`)
-with your own backend, for example Supabase or Firebase. The views only use `useApp()`.
+   Only those listed users can read or change shared data; each user's `seen` record and profile
+   are restricted to that user by row-level security.
+3. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` as Vercel environment variables and redeploy. The
+   publishable/anon key is intended for browser use; never use a service-role key in the client.
+4. Disable public sign-ups in Supabase Auth and add the deployed site URL to Supabase Auth's allowed
+   redirect URLs for password resets.
 
-## Supabase sign-in
-
-The site uses Supabase Auth for email/password sign-in. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY`
-as Vercel environment variables for each deployment environment, then redeploy. The anon key is
-intended for browser use; never use a Supabase service-role key in the client. Disable public
-sign-ups in Supabase Auth and create or invite only the two accounts you need. Add the deployed
-site URL to Supabase Auth's allowed redirect URLs for password resets.
-
-Authentication gates the app interface but does not move its data into Supabase. Outside the
-Claude artifact runtime, the app still uses demo data held only in memory. Do not store private
-shared content there until a persistent backend with row-level security policies is implemented.
+Photos are compressed in the browser and stored inline with their records. If the schema or access
+policies are missing, the app reports the database error instead of showing unsaved demo content.
 
 ## Publishing changes
 
