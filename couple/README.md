@@ -1,7 +1,8 @@
 # Our Days
 
-A private shared space for two people: a polaroid wall of daily updates, a museum-style photo gallery,
-old-fashioned letters, live chat, a flower garden, critter friends and surprise gifts.
+A private shared space for two people: a polaroid wall of daily updates, a song-of-the-day playlist
+with dated history, a museum-style photo gallery, old-fashioned letters, live chat, a flower garden,
+critter friends and surprise gifts.
 
 Built with React 18 and bundled with esbuild into one self-contained `index.html`.
 
@@ -13,7 +14,7 @@ src/
   lib.jsx           Data layer (db subscriptions, actions, image packing), shared UI (Sheet, Header), demo data
   art.jsx           All artwork as SVG: animals, flowers, gift box, icons, stickers, confetti
   styles.css        Every style, with light and dark themes through CSS variables
-  views/            Days, PinIt, Gallery, Letters, Chat, Garden, Critters, Gifts, Us
+  views/            Days, SongOfDay, PinIt, Gallery, Letters, Chat, Garden, Critters, Gifts, Us
   shims/            Map `react` to the CDN global in the production build
 scripts/
   build.mjs         Produces index.html (React loaded from cdnjs, CSS and JS inlined)
@@ -54,8 +55,10 @@ it uses Supabase Auth and the `app_data` table for persistent shared data.
 4. Disable public sign-ups in Supabase Auth and add the deployed site URL to Supabase Auth's allowed
    redirect URLs for password resets.
 
-Photos are compressed in the browser and stored inline with their records. If the schema or access
-policies are missing, the app reports the database error instead of showing unsaved demo content.
+Photos are compressed in the browser and stored inline with their records. Song links are embedded
+for Spotify, YouTube, Apple Music and SoundCloud; other secure links open at their source. If the
+schema or access policies are missing, the app reports the database error instead of showing unsaved
+demo content.
 
 ## Publishing changes
 

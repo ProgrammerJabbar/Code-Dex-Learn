@@ -24,13 +24,21 @@ grant execute on function public.is_couple_member() to authenticated;
 
 create table if not exists public.app_data (
   path text primary key check (
-    path ~ '^(pins|gallery|letters|messages|gifts|critters|garden|questions)/[^/]+$'
+    path ~ '^(pins|gallery|songs|letters|messages|gifts|critters|garden|questions)/[^/]+$'
     or path ~ '^profiles/[0-9a-fA-F-]{36}$'
     or path = 'couple/settings'
     or path ~ '^data/users/[0-9a-fA-F-]{36}/seen$'
   ),
   data jsonb not null check (jsonb_typeof(data) = 'object'),
   updated_at timestamptz not null default now()
+);
+
+alter table public.app_data drop constraint if exists app_data_path_check;
+alter table public.app_data add constraint app_data_path_check check (
+  path ~ '^(pins|gallery|songs|letters|messages|gifts|critters|garden|questions)/[^/]+$'
+  or path ~ '^profiles/[0-9a-fA-F-]{36}$'
+  or path = 'couple/settings'
+  or path ~ '^data/users/[0-9a-fA-F-]{36}/seen$'
 );
 
 alter table public.app_data enable row level security;

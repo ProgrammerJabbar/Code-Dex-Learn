@@ -255,12 +255,14 @@ export function Avatar({ p, size = 36, className = '' }) {
 
 /* ---------- icons ---------- */
 const ICONS = {
+  music: <><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></>,
   planet: <><circle cx="12" cy="12" r="6" /><path d="M3.5 15C2 11 7 6.5 15.5 5.5M20.5 9c1.5 4-3.500 8.500-12 9.500" /></>,
   frame: <><rect x="3" y="3" width="18" height="18" rx="1.5" /><rect x="7.500" y="7.500" width="9" height="9" /></>,
   mail: <><rect x="2.500" y="4.500" width="19" height="15" rx="2" /><path d="m21.500 7.500-9.500 6-9.500-6" /></>,
   chat: <path d="M21 12a8 8 0 0 1-11.600 7.100L3 21l1.900-5.400A8 8 0 1 1 21 12z" />,
   more: <><circle cx="5.500" cy="12" r="1.200" /><circle cx="12" cy="12" r="1.200" /><circle cx="18.500" cy="12" r="1.200" /></>,
   image: <><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-5-5L5 21" /></>,
+  edit: <><path d="m16 4 4 4M4 20l4-.800L19 8a2.800 2.800 0 0 0-4-4L4 15z" /><path d="M13 20h7" /></>,
   smile: <><circle cx="12" cy="12" r="9.500" /><path d="M8 14s1.500 2 4 2 4-2 4-2M9 9.500h.01M15 9.500h.01" /></>,
   palette: <><path d="M12 3a9 9 0 1 0 0 18c1.100 0 1.500-.8 1.200-1.700-.4-1 .2-2.300 1.500-2.300H17a4 4 0 0 0 4-4 9 9 0 0 0-9-10z" /><circle cx="7.500" cy="11" r="1" /><circle cx="10" cy="7" r="1" /><circle cx="15" cy="7" r="1" /></>,
   type: <path d="M4 7V4h16v3M9 20h6M12 4v16" />,

@@ -13,8 +13,8 @@ import Critters from './views/Critters.jsx';
 import Gifts from './views/Gifts.jsx';
 import Us from './views/Us.jsx';
 import Login from './views/Login.jsx';
-
-const TABS = [['days', 'planet', 'Days'], ['gallery', 'frame', 'Gallery'], ['chat', 'chat', 'Chat'], ['letters', 'mail', 'Letters'], ['more', 'more', 'More']];
+import SongOfDay from './views/SongOfDay.jsx';
+const TABS = [['days', 'planet', 'Days'], ['songs', 'music', 'Songs'], ['gallery', 'frame', 'Gallery'], ['chat', 'chat', 'Chat'], ['letters', 'mail', 'Letters'], ['more', 'more', 'More']];
 const SUB = ['garden', 'critters', 'gifts', 'us'];
 const ROUTES = [...TABS.map((t) => t[0]), ...SUB];
 
@@ -91,6 +91,7 @@ function Shell() {
     <div className="app">
       <main className="view" key={route}>
         {route === 'days' && <Days openPin={() => setPin(true)} />}
+        {route === 'songs' && <SongOfDay />}
         {route === 'gallery' && <Gallery />}
         {route === 'chat' && <Chat />}
         {route === 'letters' && <Letters />}

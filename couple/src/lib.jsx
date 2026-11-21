@@ -216,6 +216,7 @@ function Data({ boot, children }) {
     const col = (key, q) => un.push(q.onSnapshot((s) => setData((d) => ({ ...d, [key]: s.docs.map((x) => ({ id: x.id, ...x.data() })) })), bad));
     col('pins', db.collection('pins').orderBy('ts', 'desc').limit(200));
     col('gallery', db.collection('gallery'));
+    col('songs', db.collection('songs'));
     col('letters', db.collection('letters').orderBy('ts', 'desc').limit(200));
     col('messages', db.collection('messages').orderBy('ts', 'desc').limit(300));
     col('gifts', db.collection('gifts'));
@@ -298,7 +299,7 @@ function Data({ boot, children }) {
     return { days: fresh(data.pins, 'days'), chat: fresh(data.messages, 'chat'), gallery: fresh(data.gallery, 'gallery'), letters: waiting(data.letters), gifts: waiting(data.gifts) };
   }, [data.pins, data.messages, data.gallery, data.letters, data.gifts, seen, uid]);
 
-  const ready = data.profiles && data.settings && seen && data.pins && data.messages;
+  const ready = data.profiles && data.settings && seen && data.pins && data.messages && data.songs;
   const value = { uid, hasAssets: !!assets, data, me, partner, byId, nameOf, ...api, toast, markSeen, isNew, counts };
   return (
     <Ctx.Provider value={value}>
